@@ -1,661 +1,658 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>DST Cloud Transformation</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DST Multi-Cloud Transformation Plan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Visualization & Content Choices:
+        Report Info: Executive Summary (Sec I) -> Goal: Inform -> Presentation: Static text, key metrics in cards. -> Interaction: None. -> Justification: Provides high-level context.
+        Report Info: Landing Zones (Sec II) -> Goal: Compare & Inform -> Presentation: Text comparison (UNN vs CSP), HTML/CSS flow diagram for transition. -> Interaction: None. -> Justification: Clearly outlines foundational elements and transition.
+        Report Info: Use Cases 1-4 (Sec III) -> Goal: Organize & Inform -> Presentation: Accordion/tabbed sections for each use case detailing objectives, services, activities, deliverables. -> Interaction: Expand/collapse. -> Justification: Allows focused exploration of each value-delivery stage.
+        Report Info: Deployment Roadmap (Sec VI) -> Goal: Show Change/Progress -> Presentation: Chart.js horizontal bar chart (Gantt-like). -> Interaction: Hover for tooltips (activities), click to highlight (future). -> Justification: Visually represents project timeline and phases. -> Library: Chart.js.
+        Report Info: Governance (Sec VII) -> Goal: Inform -> Presentation: HTML table for RACI, text for other frameworks. -> Interaction: None. -> Justification: Presents structured governance information clearly.
+        Report Info: Service Delivery (Sec IV) -> Goal: Inform -> Presentation: Text descriptions of white-labeling model, CSP selection, cross-cloud governance. -> Interaction: None. -> Justification: Explains the operational model.
+        Report Info: Key Considerations (Sec VIII) -> Goal: Inform -> Presentation: Expandable sections for key topics. -> Interaction: Expand/collapse. -> Justification: Highlights important long-term factors.
+        Report Info: Glossary (Appendix B) -> Goal: Inform/Organize -> Presentation: HTML list/table. -> Interaction: None (Future: filter/search). -> Justification: Provides definitions.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All diagrams will be HTML/CSS based. -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        .container {
-            width: 80%;
-            margin: auto;
-            overflow: hidden;
-            padding: 0 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        header {
-            background: #333;
-            color: #fff;
-            padding-top: 30px;
-            min-height: 70px;
-            border-bottom: #0779e4 3px solid;
-        }
-        header a {
-            color: #fff;
-            text-decoration: none;
-            text-transform: uppercase;
-            font-size: 16px;
-        }
-        header ul {
-            padding: 0;
-            margin: 0;
-            list-style: none;
-            float: right;
-        }
-        header li {
-            display: inline;
-            padding: 0 20px 0 20px;
-        }
-        header #branding {
-            float: left;
-        }
-        header #branding h1 {
-            margin: 0;
-        }
-        nav {
-            background: #444;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-        }
-        nav ul {
-            padding: 0;
-            margin: 0;
-            list-style: none;
-        }
-        nav li {
-            display: inline-block;
-            margin-right: 15px;
-        }
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            padding: 5px 10px;
-        }
-        nav a:hover {
-            background: #0779e4;
-            color: #fff;
-        }
-        section {
-            padding: 20px;
-            margin-bottom: 20px;
-            border-bottom: 1px #ccc dotted;
-        }
-        h1, h2, h3, h4, h5 {
-            color: #333;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .footer {
-            background: #333;
-            color: #fff;
-            text-align: center;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        .code-block {
-            background-color: #eee;
-            padding: 10px;
-            border: 1px solid #ccc;
-            overflow-x: auto;
-        }
-        .responsive-img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 20px auto;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; /* Light gray background */ }
+        .nav-link { transition: all 0.3s ease; }
+        .nav-link.active { color: #3b82f6; border-bottom-color: #3b82f6; font-weight: 600; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-out; }
+        .chart-container { position: relative; width: 100%; max-width: 900px; margin-left: auto; margin-right: auto; height: 450px; max-height: 600px; }
+        @media (max-width: 768px) { .chart-container { height: 350px; max-height: 400px; } }
+        h1, h2, h3 { color: #1f2937; /* Darker gray for headers */ }
+        p, li { color: #4b5563; /* Medium gray for text */ }
+        .accent-color { color: #2563eb; /* Blue accent */ }
+        .bg-accent-light { background-color: #eff6ff; /* Light blue background for highlights */ }
     </style>
 </head>
-<body>
-    <header>
-        <div class="container">
-            <div id="branding">
-                <h1><a href="#">DST Cloud Transformation</a></h1>
+<body class="text-gray-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-2xl font-bold accent-color">DST Multi-Cloud Transformation</h1>
+                <button id="mobileMenuButton" class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
             </div>
+            <nav id="mainNav" class="hidden md:flex flex-col md:flex-row md:space-x-6 py-2 border-t md:border-t-0">
+                <a href="#overview" class="nav-link py-2 px-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600">Overview</a>
+                <a href="#landingZones" class="nav-link py-2 px-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600">Landing Zones</a>
+                <a href="#useCases" class="nav-link py-2 px-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600">Use Cases</a>
+                <a href="#roadmap" class="nav-link py-2 px-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600">Roadmap</a>
+                <a href="#serviceDelivery" class="nav-link py-2 px-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600">Service Delivery</a>
+                <a href="#governance" class="nav-link py-2 px-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600">Governance</a>
+                <a href="#keyConsiderations" class="nav-link py-2 px-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600">Considerations</a>
+                <a href="#glossary" class="nav-link py-2 px-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600">Glossary</a>
+            </nav>
         </div>
     </header>
 
-    <nav>
-        <div class="container">
-            <ul>
-                <li><a href="#executive_overview">Executive Overview</a></li>
-                <li><a href="#introduction">Introduction</a></li>
-                <li><a href="#landing_zone">Landing Zone</a></li>
-                <li><a href="#use_cases">Use Cases</a></li>
-                <li><a href="#multi_cloud_integration">Multi-Cloud Integration</a></li>
-                <li><a href="#migration_approach">Migration</a></li>
-                <li><a href="#roadmap">Roadmap</a></li>
-                <li><a href="#governance">Governance</a></li>
-                <li><a href="#key_considerations">Considerations</a></li>
-                <li><a href="#conclusion">Conclusion</a></li>
-                <li><a href="#appendix">Appendix</a></li>
-            </ul>
-        </div>
-    </nav>
-
-    <div class="container">
-        <section id="executive_overview">
-            <h2>I. Executive Overview</h2>
-            <p>This document outlines a comprehensive deployment strategy tailored for Datastream Digital Sdn Bhd (DST), expanding upon previous high-level proposals and strategic timelines. It directly addresses DST's request for a detailed delivery plan, demonstrating robust execution capabilities and providing a clear roadmap for the phased implementation of critical cloud services. This plan is intended to instill confidence and provide the necessary clarity for DST to proceed with its transformative Cloud Zone initiative. [1]</p>
-            <p>DST's strategic ambition is to become a leading regional cloud service provider, underscored by objectives to achieve $1 billion in annual revenue and transform Brunei's digital landscape. [1] The Cloud Zone initiative, with a projected Net Present Value (NPV) exceeding $1 billion and an Internal Rate of Return (IRR) of 68%, is central to this transformation. [1]</p>
-            <p>The deployment strategy encompasses a phased journey, commencing with the establishment of foundational services on DST's existing Unified National Network (UNN) infrastructure. This initial phase will be followed by a strategic and carefully managed transition to white-labeled offshore Cloud Service Provider (CSP) environments, specifically leveraging Amazon Web Services (AWS), Google Cloud, and Microsoft Azure. [1] This multi-stage, multi-platform approach is designed to optimize capabilities, manage costs effectively, and provide DST with the flexibility to utilize best-of-breed services from leading CSPs, all managed and delivered seamlessly. [1]</p>
-            <p>The core services to be deployed include Infrastructure as a Service (IaaS), comprehensive Migration Services, scalable Data Storage solutions, and resilient Disaster Recovery as a Service (DRaaS). [1] These services will be rolled out in a phased manner, designed to deliver incrementally increasing value. A foundational Cloud Landing Zone (LZ) is paramount, providing the secure, governed, and scalable environment necessary for all subsequent service deployments. [1] Once the LZ is established, certain deployment activities for the use cases can proceed in parallel, accelerating time-to-market. This approach is designed to unlock significant market opportunities, including a $13.7 billion addressable market for the four key services in ASEAN. [1]</p>
-            <p>The successful execution of this multi-faceted deployment extends beyond technical implementation. It necessitates a concurrent evolution of DST's operational model to effectively manage a cloud brokerage and managed services business. [1] This operational transformation is a critical underpinning for realizing the projected revenue and market leadership.</p>
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <section id="overview" class="content-section space-y-6">
+            <div class="card p-6">
+                <h2 class="text-2xl font-semibold mb-4">Executive Overview</h2>
+                <p class="mb-3">This interactive application outlines Ollion's comprehensive deployment strategy for DST's multi-cloud transformation. It expands on the high-level proposal, providing a detailed roadmap for implementing IaaS, Migration Services, Data Storage, and DRaaS. The approach focuses on a phased journey, starting with DST's UNN infrastructure and transitioning to white-labeled offshore CSP environments (AWS, GCP, Azure), delivering incremental value at each stage.</p>
+                <p>The core goal is to empower DST with enhanced agility, operational efficiency, and robust business resilience through a modern, multi-cloud architecture managed seamlessly by Ollion.</p>
+            </div>
+             <div class="grid md:grid-cols-2 gap-6">
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-3 accent-color">Purpose of This Application</h3>
+                    <p>To provide DST with a clear, interactive, and easily digestible overview of the detailed deployment plan. This application aims to instill confidence and clarity regarding the phased approach, key deliverables, and strategic value of the multi-cloud transformation initiative.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-3 accent-color">Strategic Imperatives</h3>
+                     <ul class="list-disc list-inside space-y-1">
+                        <li>Enhance agility and operational efficiency.</li>
+                        <li>Enable innovation and future growth.</li>
+                        <li>Optimize costs through strategic cloud adoption.</li>
+                        <li>Ensure robust business resilience and disaster recovery.</li>
+                        <li>Deliver incremental and measurable business value.</li>
+                    </ul>
+                </div>
+            </div>
         </section>
 
-        <section id="introduction">
-            <h2>II. Introduction and Strategic Context</h2>
-            <h3>Purpose of this Document</h3>
-            <p>The purpose of this document is to provide DST with a detailed, actionable deployment approach for its Cloud Zone strategy. It outlines the sequential and parallel activities required to successfully launch the four core cloud service offerings: IaaS, Migration Services, Data Storage, and DRaaS. This plan builds upon the strategic groundwork, market analysis, and business case development undertaken during the initial 14-week joint engagement between DST and Ollion. [1]</p>
-            <h3>DST's Cloud Ambition</h3>
-            <p>DST has articulated a clear and ambitious vision: to transform from its current market position into Brunei's leading cloud-agnostic broker and a significant regional cloud services player. [1] The establishment of the Cloud Zone is the cornerstone of this strategy, pivotal for achieving the stated financial objective of $1 billion in annual revenue as a digital service provider and realizing a projected 68% IRR from cloud operations. [1] This initiative directly supports DST's 2024 objectives to establish leadership in the local cloud market and leverage cloud technology for national transformation and growth. [1]</p>
-            <h3>Service Portfolio Overview</h3>
-            <p>The Cloud Zone will initially focus on four key service offerings, as defined in the "2025 Cloud Zone Strategy" proposal [1]:</p>
-            <ul>
-                <li><strong>Infrastructure as a Service (IaaS):</strong> Evolving from leveraging existing data center usage to a comprehensive cloud brokerage model, offering choice across AWS, Google Cloud, and Microsoft Azure, orchestrated by DST. [1]</li>
-                <li><strong>Migration & Managed Services:</strong> Facilitating secure and efficient migration to cloud environments and providing ongoing management, leveraging the DST-Ollion alliance for deep cloud expertise. [1]</li>
-                <li><strong>Data Storage:</strong> Offering tiered storage solutions, including high-speed critical data storage and cost-efficient standard storage, initially leveraging DST's existing infrastructure and regional submarine cable links. [1]</li>
-                <li><strong>Disaster Recovery as a Service (DRaaS):</strong> Providing highly reliable DRaaS by utilizing Brunei's strategic submarine cable connections and existing data center footprint, positioning DST as a regional hub for business continuity. [1]</li>
-            </ul>
-            <h3>Core Principles of Deployment</h3>
-            <p>The deployment of the Cloud Zone will adhere to the following core principles [1]:</p>
-            <ul>
-                <li><strong>Phased Rollout:</strong> Services will be introduced incrementally, allowing for managed investment, risk mitigation, and iterative value delivery. The initial focus will be on UNN-based services.</li>
-                <li><strong>Use Case Driven:</strong> The deployment is structured around the four key use cases, each building on the capabilities of the previous ones and delivering progressively more sophisticated value to the market.</li>
-                <li><strong>Landing Zone First:</strong> A robust, secure, and well-governed Cloud Landing Zone is a non-negotiable prerequisite for the deployment of any service.</li>
-                <li><strong>Parallel Execution:</strong> Following the establishment of the LZ, certain development and deployment workstreams for different use cases can be executed in parallel to optimize timelines.</li>
-                <li><strong>White-Labeling Strategy:</strong> Hyperscaler services from AWS, Google Cloud, and Azure will be offered as DST-branded solutions, with DST managing the customer relationship, billing, and first-line support, providing a seamless experience. [1]</li>
-            </ul>
-            <h3>"Crawl, Walk, Run" Approach</h3>
-            <p>The "Crawl, Walk, Run" approach, outlined in the initial revenue projections [1], is a strategic imperative that guides this deployment plan. The "Crawl" phase (Year 0-1), emphasizing the development of minimum viable capacity for IaaS and Migration services on UNN, is critical. This allows DST to build essential operational experience, test market reception, and establish credibility with lower initial capital expenditure, particularly by monetizing existing infrastructure as planned for IaaS and Data Storage. [1] This approach de-risks the substantial long-term investment by ensuring foundational capabilities and market understanding are in place before scaling aggressively with multiple hyperscaler partnerships in the "Walk" (Year 1-2) and "Run" (Year 3 onwards) phases. [1]</p>
-            <h3>Strategic Imperatives for DST</h3>
-            <p>While the specific business drivers for DST's initiative are proprietary, this deployment approach is architected to align with common strategic imperatives such as enhanced agility, operational efficiency, innovation enablement, cost optimization, and robust business resilience. The proposed phased deployment, centered around four interdependent use cases, is designed to deliver incremental and measurable value, ensuring that each stage of the transformation directly contributes to DST's overarching business objectives. [1]</p>
+        <section id="landingZones" class="content-section space-y-6">
+            <div class="card p-6">
+                <h2 class="text-2xl font-semibold mb-4">Foundational Landing Zone Deployment</h2>
+                <p class="mb-4">A landing zone (LZ) is a pre-configured, secure, and scalable environment that forms the cornerstone of cloud adoption. It enforces security, ensures compliance, drives operational efficiency, and accelerates workload deployment. This project starts with an UNN-based LZ, then transitions to white-labeled CSP LZs.</p>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold mb-3">Initial UNN-Based Landing Zone Architecture</h3>
+                    <p class="mb-2">The initial private cloud LZ on UNN will focus on core IaaS, IAM, security, and operations, designed to support initial use cases and facilitate a smooth transition to CSPs.</p>
+                    <ul class="list-disc list-inside space-y-1 pl-4">
+                        <li><strong>Core Infrastructure (IaaS on UNN):</strong> Compute (VMs), segmented Network, on-premise Storage.</li>
+                        <li><strong>Identity and Access Management (IAM):</strong> Authentication, Authorization, Role-Based Access Control (RBAC), integration with existing DST identity systems.</li>
+                        <li><strong>Security and Governance:</strong> Security policies, perimeter/internal security, compliance controls, logging/monitoring.</li>
+                        <li><strong>Operational Model:</strong> Standardized provisioning, backup/recovery, change/configuration management.</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">Transition Pathway to White-Labeled CSP Landing Zones</h3>
+                    <p class="mb-2">Strategic transition to Ollion's white-labeled CSP LZs (AWS, Azure, GCP) aims to leverage CSP-specific strengths, enhance scalability, access advanced services, ensure global reach, and optimize costs. Ollion will manage these, abstracting complexity from DST.</p>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold mb-2 text-lg">CSP Landing Zone Design Principles:</h4>
+                        <ul class="list-disc list-inside space-y-1 pl-4">
+                            <li>Adherence to Well-Architected Frameworks (AWS, Azure).</li>
+                            <li>Multi-Account/Subscription Strategy for isolation and governance.</li>
+                            <li>Distinction between Platform Landing Zones (PLZs) and Application Landing Zones (ALZs).</li>
+                            <li>Infrastructure as Code (IaC) for consistent, repeatable deployments.</li>
+                        </ul>
+                    </div>
+                     <div class="mt-4 p-4 border border-blue-300 rounded-lg bg-blue-50">
+                        <h4 class="font-semibold text-blue-700 text-lg mb-2">Transition Flow: UNN to CSP</h4>
+                        <ol class="list-decimal list-inside space-y-2 pl-4 text-blue-600">
+                            <li>Establish & Validate UNN Landing Zone & Pilot Workloads.</li>
+                            <li>Design & Build White-Labeled CSP Platform Landing Zone (e.g., AWS).</li>
+                            <li>Migrate/Rehost Pilot Workloads from UNN to CSP PLZ.</li>
+                            <li>Implement Ollion's White-Label Service Management for CSP.</li>
+                            <li>Expand to other CSPs (Azure, GCP) based on strategic fit for subsequent use cases.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <section id="landing_zone">
-            <h2>III. Foundational Landing Zone Deployment</h2>
-            <h3>A. Landing Zone: The Cornerstone of Cloud Adoption</h3>
-            <p>The Cloud Landing Zone (LZ) is the cornerstone of DST's Cloud Zone strategy. Its purpose is to establish a secure, compliant, scalable, and well-governed foundation that will host and manage all cloud services offered by DST. This applies whether services are delivered from DST's own UNN infrastructure or through white-labeled offerings from AWS, Google Cloud, and Azure. The LZ is the non-negotiable first step and a prerequisite for the successful deployment of all subsequent use cases. [1] A landing zone is a pre-configured environment designed according to best practices to support enterprise-scale cloud adoption, enforcing security, ensuring compliance, driving operational efficiency, and accelerating workload deployment. [1]</p>
-            <p><strong>Key Objectives for the LZ include:</strong> [1]</p>
-            <ul>
-                <li>Standardize environments for rapid service deployment.</li>
-                <li>Enforce security, compliance, and governance consistently.</li>
-                <li>Enable efficient, centralized operations and monitoring.</li>
-                <li>Clearly demarcate responsibilities (UNN, CSPs, customer).</li>
-                <li>Facilitate integrated multi-cloud cost management and billing.</li>
-            </ul>
-            <h3>B. Initial UNN-Based Landing Zone Architecture (Private Cloud Focus)</h3>
-            <p>The initial deployment phase will establish a robust landing zone within DST's existing UNN infrastructure. This private cloud landing zone will support initial use cases and pave the way for CSP integration. [1] The LZ will comprise several core components, initially focused on UNN-based services, while architected with CSP-agnostic principles for future hyperscaler integration. [1]</p>
-            <h4>Core Infrastructure (IaaS on UNN):</h4>
-            <ul>
-                <li><strong>Compute:</strong> Leverage DST's existing virtualization platform (e.g., VMware) for VMs. Define resource provisioning and capacity management. [1]</li>
-                <li><strong>Network:</strong> Establish a segmented network architecture within UNN for secure isolation and controlled traffic flow (e.g., logical segments, internal firewalls, hub-and-spoke model). Strictly control external connectivity. [1]</li>
-                <li><strong>Storage:</strong> Utilize on-premise UNN storage solutions. Implement capacity planning, data management policies (tiering, backup), and performance optimization. [1]</li>
-            </ul>
-            <h4>Identity and Access Management (IAM):</h4>
-            <ul>
-                <li><strong>Initial Focus (UNN):</strong> Implement a centralized IAM solution for UNN-based services, defining roles, policies, and access controls. [1]</li>
-                <li><strong>CSP Agnostic Principle:</strong> Design with federation capabilities to integrate seamlessly with AWS IAM, Google Cloud IAM, and Azure Active Directory. [1] Integrate with existing DST identity systems where appropriate. [1] Enforce Role-Based Access Control (RBAC). [1]</li>
-            </ul>
-            <h4>Security and Governance Controls:</h4>
-            <ul>
-                <li><strong>Initial Focus (UNN):</strong> Establish security baselines, implement core security controls (firewalls, IDS/IPS, WAFs), and deploy security monitoring tools for the UNN environment. Address local data sovereignty requirements. [1]</li>
-                <li><strong>CSP Agnostic Principle:</strong> Develop a security and compliance framework (e.g., ISO 27001, SOC 2) applicable across UNN and white-labeled CSP services. Implement tools for a unified security posture view. [1] Establish comprehensive security policies and compliance measures. [1] Implement centralized logging, monitoring, and auditing. [1]</li>
-            </ul>
-            <h4>Operations Management:</h4>
-            <ul>
-                <li><strong>Initial Focus (UNN):</strong> Implement solutions for centralized logging, monitoring, alerting, patching, and backup/recovery for UNN-hosted services. [1]</li>
-                <li><strong>CSP Agnostic Principle:</strong> Select or design operational tools that integrate with CSP-native services (e.g., CloudWatch, Azure Monitor, Google Cloud's operations suite) for a single pane of glass. [1] Define provisioning/de-provisioning processes and ITIL-aligned change/configuration management. [1]</li>
-            </ul>
-            <h4>Orchestration and Automation:</h4>
-            <ul>
-                <li><strong>Initial Focus (UNN):</strong> Implement orchestration and automation tools for provisioning, configuring, and managing UNN resources. [1]</li>
-                <li><strong>CSP Agnostic Principle:</strong> Design a service catalog and orchestration layer extensible to multiple CSPs, potentially using a Cloud Management Platform (CMP) or Infrastructure-as-Code (IaC). [1]</li>
-            </ul>
-            <h4>Cost Management & Billing Foundation:</h4>
-            <ul>
-                <li><strong>Initial Focus (UNN):</strong> Establish mechanisms for metering and tracking UNN resource consumption. [1]</li>
-                <li><strong>CSP Agnostic Principle:</strong> Design a framework for ingesting CSP billing data, aggregating costs, and enabling integrated billing for customers. [1]</li>
-            </ul>
-            <p>The design philosophy for the LZ must be inherently "CSP-agnostic" from the outset to reduce future integration friction and enable agile cloud brokerage. [1]</p>
+        <section id="useCases" class="content-section space-y-6">
+            <div class="card p-6">
+                <h2 class="text-2xl font-semibold mb-4">Use Case-Driven Phased Deployment</h2>
+                <p class="mb-6">The deployment is structured around four interdependent use cases, each building on the previous one to deliver incremental value. This approach allows for continuous feedback, risk mitigation, and parallel workstreams once the foundational LZ is stable. Agile principles will be employed within each phase.</p>
 
-            <h4>Table 1: Landing Zone Core Components & Objectives (Adapted from [1])</h4>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Component Area</th>
-                        <th>Key Deliverables for LZ</th>
-                        <th>Initial Focus (UNN/CSP Agnostic Principles)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>IAM</strong></td>
-                        <td>Centralized user directory, RBAC, MFA policies.</td>
-                        <td>UNN user management; design for federation with AWS IAM, Azure AD, Google Cloud IAM.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Network</strong></td>
-                        <td>Secure network segments, IPAM, DNS, firewall rules, connectivity.</td>
-                        <td>UNN network setup; design for hybrid connectivity to CSPs, consistent IP addressing.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Security</strong></td>
-                        <td>Security baselines, vulnerability management, SIEM, compliance framework.</td>
-                        <td>UNN security hardening & monitoring; universal compliance framework, data sovereignty.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Operations</strong></td>
-                        <td>Centralized logging, monitoring, alerting, backup & recovery.</td>
-                        <td>UNN operational tools; select tools with multi-cloud integration for unified view.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Orchestration</strong></td>
-                        <td>Service catalog foundation, automation for UNN resources.</td>
-                        <td>UNN resource provisioning; design extensible service catalog/orchestration, consider IaC.</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Cost Management</strong></td>
-                        <td>Usage tracking for UNN, foundational reporting.</td>
-                        <td>UNN metering; design for multi-CSP billing data aggregation, unified invoicing.</td>
-                    </tr>
-                </tbody>
-            </table>
+                <div class="space-y-4">
+                    <div class="border border-gray-300 rounded-lg">
+                        <button class="accordion-toggle w-full text-left p-4 bg-gray-100 hover:bg-gray-200 focus:outline-none flex justify-between items-center rounded-t-lg">
+                            <span class="font-semibold text-lg">Use Case 1: Foundational IaaS & Initial Workload Migration</span>
+                            <span class="text-xl transition-transform transform rotate-0 ui-open:rotate-180">&#9660;</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white rounded-b-lg">
+                            <p class="font-semibold mb-1">Objectives & DST Value:</p>
+                            <ul class="list-disc list-inside mb-3 pl-4">
+                                <li>Establish core IaaS on UNN.</li>
+                                <li>Migrate pilot low-risk applications to UNN to validate LZ, processes, and operations.</li>
+                                <li>DST Value: Proof of delivery, baseline operational model, quick wins, de-risk CSP transition.</li>
+                            </ul>
+                            <p class="font-semibold mb-1">Services Leveraged:</p>
+                            <ul class="list-disc list-inside mb-3 pl-4">
+                                <li>IaaS (UNN)</li>
+                                <li>Migration Services (for UNN deployment)</li>
+                            </ul>
+                             <p class="font-semibold mb-1">Key Deployment Activities & Deliverables (UNN):</p>
+                            <ul class="list-disc list-inside mb-3 pl-4">
+                                <li>UNN LZ Build-Out & Validation.</li>
+                                <li>Pilot Workload Selection, Assessment & Migration.</li>
+                                <li>Operational Runbooks for Pilot Workloads on UNN.</li>
+                            </ul>
+                            <p class="font-semibold mb-1">Transition to White-Labeled CSPs:</p>
+                            <ul class="list-disc list-inside pl-4">
+                                <li>Rehost pilot workloads from UNN to first CSP (e.g., AWS).</li>
+                                <li>Establish initial CSP Platform Landing Zone (PLZ).</li>
+                                <li>Implement Ollion's white-labeling for service management and billing.</li>
+                            </ul>
+                        </div>
+                    </div>
 
-            <h3>C. Transition Pathway to White-Labeled CSP Landing Zones (AWS, Azure, Google Cloud)</h3>
-            <p>Following UNN LZ utilization, a strategic transition to Ollion's white-labeled CSP landing zones will unlock enhanced capabilities. [1]</p>
-            <ul>
-                <li><strong>Rationale for Transition:</strong> Leverage CSP-specific strengths (e.g., AWS for broad IaaS, Azure for Microsoft workloads, Google Cloud for data analytics/ML), enhanced scalability, access to advanced services, global reach, and cost optimization via pay-as-you-go models. [1]</li>
-                <li><strong>CSP Landing Zone Design Principles:</strong> Adhere to Well-Architected Frameworks (AWS, Azure), implement multi-account/subscription strategies for isolation and governance, distinguish between Platform Landing Zones (PLZs for shared services managed by Ollion) and Application Landing Zones (ALZs for DST workloads), and utilize Infrastructure as Code (IaC) for consistent deployments (e.g., CloudFormation, ARM/Bicep, Terraform). [1]</li>
-                <li><strong>Specific CSP Landing Zone Components:</strong> Leverage native CSP services like AWS Control Tower, AWS Organizations, VPC, Security Hub; Azure Management Groups, Azure Policy, VNets, Microsoft Defender for Cloud; Google Cloud Folders/Projects, VPC networks, IAM, Security Command Center. Ollion's white-labeling will abstract these specifics, providing a unified interface. [1]</li>
-            </ul>
-            <h4>Deployment Activities (LZ) [1]</h4>
-            <ol>
-                <li>Detailed Design Workshops (architecture, network, security, IAM, operations, automation).</li>
-                <li>Infrastructure Provisioning (UNN compute, storage, network for LZ management plane).</li>
-                <li>Tool Selection and Implementation (IAM, security, monitoring, orchestration, cost management).</li>
-                <li>Policy Definition and Configuration (codify security, governance, operational policies).</li>
-                <li>Integration and Automation (initial scripts for common tasks).</li>
-                <li>Testing and Validation (all LZ components, security, operations, automation).</li>
-                <li>Documentation and Training (LZ architecture, operations, policies; train DST teams).</li>
-            </ol>
+                    <div class="border border-gray-300 rounded-lg">
+                        <button class="accordion-toggle w-full text-left p-4 bg-gray-100 hover:bg-gray-200 focus:outline-none flex justify-between items-center rounded-t-lg">
+                            <span class="font-semibold text-lg">Use Case 2: Scalable Data Storage</span>
+                             <span class="text-xl transition-transform transform rotate-0 ui-open:rotate-180">&#9660;</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white rounded-b-lg">
+                            <p class="font-semibold mb-1">Objectives & DST Value:</p>
+                            <ul class="list-disc list-inside mb-3 pl-4">
+                                <li>Implement robust, scalable data storage solutions.</li>
+                                <li>DST Value: Secure data storage, foundation for data-driven insights (if analytics added later), improved data governance. Long-term strategy favors CSP storage.</li>
+                            </ul>
+                            <p class="font-semibold mb-1">Services Leveraged:</p>
+                            <ul class="list-disc list-inside mb-3 pl-4">
+                                <li>Data Storage (UNN for initial/staging, then CSPs)</li>
+                                <li>IaaS (UNN for initial processing, if needed)</li>
+                                <li>Migration Services (Data migration)</li>
+                            </ul>
+                             <p class="font-semibold mb-1">Key Deployment Activities & Deliverables (UNN Focus initially):</p>
+                            <ul class="list-disc list-inside mb-3 pl-4">
+                                <li>Data Landscape Assessment.</li>
+                                <li>UNN Data Storage Architecture Design & Implementation.</li>
+                                <li>Initial Data Ingestion Pipelines to UNN.</li>
+                            </ul>
+                            <p class="font-semibold mb-1">Transition to White-Labeled CSPs:</p>
+                            <ul class="list-disc list-inside pl-4">
+                                <li>Migrate data to CSP-native storage (e.g., S3, Azure Blob, GCS).</li>
+                                <li>Implement data synchronization strategies for hybrid scenarios.</li>
+                                <li>Ollion white-labeling for unified data asset management.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="border border-gray-300 rounded-lg">
+                        <button class="accordion-toggle w-full text-left p-4 bg-gray-100 hover:bg-gray-200 focus:outline-none flex justify-between items-center rounded-t-lg">
+                            <span class="font-semibold text-lg">Use Case 3: Modernized Application Hosting & Delivery</span>
+                            <span class="text-xl transition-transform transform rotate-0 ui-open:rotate-180">&#9660;</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white rounded-b-lg">
+                            <p class="font-semibold mb-1">Objectives & DST Value:</p>
+                            <ul class="list-disc list-inside mb-3 pl-4">
+                                <li>Migrate a broader portfolio of DST applications.</li>
+                                <li>Modernize selected applications using cloud-native services.</li>
+                                <li>DST Value: Enhanced application performance/availability, reduced operational burden, faster deployments, improved cost-efficiency.</li>
+                            </ul>
+                            <p class="font-semibold mb-1">Services Leveraged:</p>
+                            <ul class="list-disc list-inside mb-3 pl-4">
+                                <li>IaaS (UNN, then CSPs)</li>
+                                <li>Migration Services (Using "6 Rs": Rehost, Replatform, Refactor, etc.)</li>
+                                <li>PaaS/CaaS (CSPs - optional for modernization)</li>
+                            </ul>
+                            <p class="font-semibold mb-1">Key Deployment Activities & Deliverables:</p>
+                            <ul class="list-disc list-inside mb-3 pl-4">
+                                <li>Application Portfolio Assessment & Rationalization.</li>
+                                <li>Migration to UNN (if interim step needed).</li>
+                                <li>Deployment/Migration to White-Labeled CSPs in waves.</li>
+                                <li>Application Modernization (Re-platforming, Re-factoring) for selected candidates.</li>
+                                <li>Updated Application Runbooks for CSPs.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="border border-gray-300 rounded-lg">
+                        <button class="accordion-toggle w-full text-left p-4 bg-gray-100 hover:bg-gray-200 focus:outline-none flex justify-between items-center rounded-t-lg">
+                            <span class="font-semibold text-lg">Use Case 4: Comprehensive Disaster Recovery & Business Continuity</span>
+                            <span class="text-xl transition-transform transform rotate-0 ui-open:rotate-180">&#9660;</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white rounded-b-lg">
+                            <p class="font-semibold mb-1">Objectives & DST Value:</p>
+                            <ul class="list-disc list-inside mb-3 pl-4">
+                                <li>Establish robust DR for critical workloads (on UNN or CSPs).</li>
+                                <li>Meet defined RTOs and RPOs.</li>
+                                <li>Implement regular DR testing.</li>
+                                <li>DST Value: Enhanced business resilience, reduced risk of data loss/downtime, operational continuity, compliance.</li>
+                            </ul>
+                            <p class="font-semibold mb-1">Services Leveraged:</p>
+                            <ul class="list-disc list-inside mb-3 pl-4">
+                                <li>DRaaS (UNN, then CSPs)</li>
+                                <li>IaaS (for recovery environments)</li>
+                                <li>Data Storage (for replicated data/backups)</li>
+                                <li>Migration Services (for data replication setup)</li>
+                            </ul>
+                            <p class="font-semibold mb-1">Key Deployment Activities & Deliverables:</p>
+                            <ul class="list-disc list-inside mb-3 pl-4">
+                                <li>Business Impact Analysis (BIA) and RTO/RPO Definition.</li>
+                                <li>DR Solution Design for UNN workloads (if applicable).</li>
+                                <li>Implementation of CSP-Based DRaaS (e.g., AWS DRS, Azure Site Recovery, GCP DR solutions).</li>
+                                <li>Development and Testing of DR Runbooks.</li>
+                                <li>Regular DR Drills and Validation.</li>
+                                <li>Ollion white-labeling for unified DR posture view and orchestration.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <section id="use_cases">
-            <h2>IV. Phased Deployment of Use Cases</h2>
-            <p>The deployment of DST's Cloud Zone services will occur in phases, building upon the last and delivering increasing value. This aligns with the "Crawl, Walk, Run" strategy. [1]</p>
-            <h3>A. Overall Phasing Strategy [1]</h3>
-            <ul>
-                <li><strong>Phase 1 (UNN Foundation & Core Enablement):</strong> Leverage UNN infrastructure to monetize assets, address data sovereignty, and build initial cloud operational capabilities. Key services: UNN-based Data Storage and basic IaaS.</li>
-                <li><strong>Phase 2 (Cloud Adoption & Brokerage Initiation):</strong> Introduce services facilitating cloud adoption and begin cloud brokerage. Includes Migration Services, foundational DRaaS on UNN, and preparing for/initiating first white-labeled hyperscaler integration.</li>
-                <li><strong>Phase 3 (Full Multi-Cloud Brokerage & Advanced Services):</strong> Achieve comprehensive multi-cloud brokerage (AWS, Google Cloud, Azure). Offer advanced DRaaS (UNN & CSPs) and expand with sophisticated managed services.</li>
-            </ul>
-
-            <h4>Table 2: Phased Deployment & Value Delivery Overview (Adapted from [1])</h4>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Phase</th>
-                        <th>Use Case(s) Deployed</th>
-                        <th>Primary Infrastructure Focus (UNN/CSP Mix)</th>
-                        <th>Key Capabilities Delivered to Market</th>
-                        <th>Strategic Value to DST</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>1 (Crawl)</strong></td>
-                        <td>UC1: Core Infrastructure Enablement & Data Sovereignty</td>
-                        <td>Primarily UNN</td>
-                        <td>Sovereign Data Storage (tiered), Basic UNN IaaS (VMs), initial self-service portal.</td>
-                        <td>Monetize existing assets, address local data residency needs, build foundational cloud operational experience, generate early revenue. [1]</td>
-                    </tr>
-                    <tr>
-                        <td><strong>2 (Walk)</strong></td>
-                        <td>UC2: Enabling Cloud Adoption & Foundational DR</td>
-                        <td>Primarily UNN, prep for CSP integration</td>
-                        <td>Migration Services (assessment, P2V, V2V), UNN-to-UNN DRaaS, enhanced service catalog.</td>
-                        <td>Drive adoption of UNN services, address business continuity, build migration expertise, prepare for hyperscaler introduction. [1]</td>
-                    </tr>
-                    <tr>
-                        <td><strong>3 (Run - Start)</strong></td>
-                        <td>UC3: Multi-Cloud Brokerage & Expanded Data Services</td>
-                        <td>UNN & White-labeled AWS, Google Cloud, Azure</td>
-                        <td>White-labeled IaaS from CSPs, Hybrid Data Storage (UNN + CSP tiers), integrated billing, unified support.</td>
-                        <td>Offer client choice & flexibility, access to advanced CSP services, competitive positioning as cloud broker, significant IaaS revenue growth. [1]</td>
-                    </tr>
-                    <tr>
-                        <td><strong>4 (Run - Scale)</strong></td>
-                        <td>UC4: Advanced DR & Regional Managed Services Leadership</td>
-                        <td>UNN & White-labeled AWS, Google Cloud, Azure</td>
-                        <td>Advanced DRaaS (hybrid, CSP-based, cross-region), comprehensive Managed Services for hybrid environments.</td>
-                        <td>High-value recurring revenue, enhanced customer stickiness, regional leadership in business continuity and managed cloud services. [1]</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3>B. Use Case 1: Core Infrastructure Enablement & Data Sovereignty (Approx. Months 1-4 post-LZ) [1]</h3>
-            <p>This use case activates core infrastructure services on DST's UNN.</p>
-            <ul>
-                <li><strong>Objectives & DST Value:</strong> Provide immediate value to the local market, form building blocks for subsequent offerings, monetize existing assets, address data sovereignty, and build operational experience. [1]</li>
-                <li><strong>Services Activated:</strong> [1]
-                    <ul>
-                        <li><strong>Data Storage (UNN-based):</strong> Leverage existing data center capacity and implement software-defined storage. Offerings: <em>Critical Data Storage</em> (high-speed, max security, high SLAs) and <em>Standard Data Storage</em> (cost-efficient, scalable). [1]</li>
-                        <li><strong>Basic IaaS (UNN-based):</strong> Initial VM offerings from UNN compute infrastructure. [1]</li>
+        <section id="roadmap" class="content-section">
+            <div class="card p-6">
+                <h2 class="text-2xl font-semibold mb-4">Deployment Roadmap & Timeline</h2>
+                <p class="mb-4">This roadmap elaborates on the high-level schedule (Proposal Slide 23), providing a granular breakdown of phases, activities, and key milestones. Timelines are indicative and will be refined. Note: Illustrative durations are used for visualization as exacts are pending detailed Phase 0 planning.</p>
+                <div class="chart-container">
+                    <canvas id="roadmapChart"></canvas>
+                </div>
+                <div class="mt-6 space-y-3">
+                    <h3 class="text-xl font-semibold mt-6 mb-3">Key Milestones & Decision Gates:</h3>
+                    <ul class="list-disc list-inside pl-4 space-y-1">
+                        <li><strong>M1:</strong> UNN LZ Operational & Pilot Workloads Migrated to UNN. (Go/No-Go for Phase 1 CSP transition)</li>
+                        <li><strong>M2:</strong> First CSP Platform LZ Operational & Pilot Workloads Migrated. (Go/No-Go for broader CSP deployments)</li>
+                        <li><strong>M3:</strong> Scalable Data Storage on CSPs Operational.</li>
+                        <li><strong>M4:</strong> Critical Application Group 1 Migrated/Modernized to CSPs.</li>
+                        <li><strong>M5:</strong> Comprehensive DR Solution Tested & Validated for Migrated Critical Workloads.</li>
+                        <li><strong>M6:</strong> Project Completion & Transition to Ongoing Managed Service.</li>
                     </ul>
-                </li>
-                <li><strong>Deployment Activities (UNN):</strong>
-                    <ul>
-                        <li><em>Data Storage (UNN):</em> Assess/optimize UNN storage, deploy SDS, define service tiers/SLAs/pricing, integrate with LZ (IAM, monitoring, billing), expose via self-service portal. [1]</li>
-                        <li><em>Basic IaaS (UNN):</em> Deploy virtualization platform, develop standard VM images, integrate VM provisioning with LZ (IAM, network, security, monitoring), create service catalog entries. [1]</li>
-                    </ul>
-                </li>
-                <li><strong>Key Outputs:</strong> Operational UNN Data Storage & IaaS, initial self-service portal, documented procedures/SLAs. [1]</li>
-                <li><strong>Value Delivered:</strong> Monetization of existing assets, addresses data sovereignty, foundational platform, early revenue. [1]</li>
-            </ul>
-
-            <h3>C. Use Case 2: Enabling Cloud Adoption & Foundational DR (Approx. Months 3-6 post-LZ) [1]</h3>
-            <p>Focuses on services facilitating customer adoption and business continuity.</p>
-            <ul>
-                <li><strong>Objectives & DST Value:</strong> Facilitate adoption of Cloud Zone, address business continuity, build migration expertise for future CSP migrations, generate professional services revenue. [1]</li>
-                <li><strong>Services Activated:</strong> [1]
-                    <ul>
-                        <li><strong>Migration Services:</strong> Professional services to assist customers migrating workloads to UNN IaaS, building expertise for future CSP migrations. Leverage DST-Ollion alliance. [1]</li>
-                        <li><strong>DRaaS (UNN-to-UNN):</strong> Initial DRaaS leveraging UNN Data Storage & IaaS, utilizing Brunei's submarine cables. [1]</li>
-                    </ul>
-                </li>
-                <li><strong>Deployment Activities:</strong>
-                    <ul>
-                        <li><em>Migration Services:</em> Establish practice (Ollion alliance), define methodology, select tools, develop skills (P2V, V2V), internal training, develop assessment frameworks. [1]</li>
-                        <li><em>DRaaS (UNN-to-UNN):</em> Define service tiers (RPO/RTO), select replication tech, develop DR plans/runbooks, integrate monitoring with LZ, establish testing procedures, develop pricing. [1]</li>
-                    </ul>
-                </li>
-                <li><strong>Key Outputs:</strong> Established Migration Services practice, operational UNN-to-UNN DRaaS, documented procedures, initial customer engagements. [1]</li>
-                <li><strong>Value Delivered:</strong> Accelerates UNN IaaS adoption, addresses local DR needs, builds foundational expertise for complex DR/migration. [1]</li>
-            </ul>
-
-            <h3>D. Use Case 3: Multi-Cloud Brokerage & Expanded Data Services (Approx. Months 6-12 post-LZ) [1]</h3>
-            <p>Marks DST's expansion into a multi-cloud broker.</p>
-            <ul>
-                <li><strong>Objectives & DST Value:</strong> Provide customer choice and flexibility, access to advanced CSP services, enhance competitive positioning, unlock IaaS revenue growth. [1]</li>
-                <li><strong>Services Activated:</strong> [1]
-                    <ul>
-                        <li><strong>IaaS (White-labeled AWS, Google Cloud, Azure):</strong> Full cloud brokerage model; DST manages procurement, integration, performance, billing, support. [1]</li>
-                        <li><strong>Data Storage (Hybrid & Tiered):</strong> Integrate white-labeled CSP storage (S3, Blob, GCS) for tiered solutions (UNN for hot, CSP for warm/archive). [1]</li>
-                    </ul>
-                </li>
-                <li><strong>Deployment Activities:</strong>
-                    <ul>
-                        <li><em>CSP Partnership & Technical Integration:</em> Finalize agreements, establish network connectivity (Direct Connect, ExpressRoute, Interconnect), implement IAM federation, set up master billing accounts and data aggregation. [1]</li>
-                        <li><em>IaaS Brokerage Platform:</em> Enhance/implement service catalog/portal for CSP IaaS, develop/integrate orchestration (CMP), integrate CSP monitoring into DST dashboards. [1]</li>
-                        <li><em>Hybrid Data Storage:</em> Define tiers, implement data movement/tiering tools, update service catalog. [1]</li>
-                        <li><em>Sales & Support Enablement:</em> Train teams on CSP offerings, update support processes. [1]</li>
-                    </ul>
-                </li>
-                <li><strong>Key Outputs:</strong> DST-branded IaaS from CSPs via portal, integrated billing, unified first-line support, hybrid data storage portfolio, trained teams. [1]</li>
-                <li><strong>Value Delivered:</strong> Unparalleled choice, access to advanced CSP services, full-service broker transformation, substantial IaaS revenue growth. [1]</li>
-            </ul>
-
-            <h3>E. Use Case 4: Advanced DR & Regional Managed Services Leadership (Approx. Months 9-18+ post-LZ) [1]</h3>
-            <p>Maturation of DST's Cloud Zone into a provider of sophisticated, high-value services.</p>
-            <ul>
-                <li><strong>Objectives & DST Value:</strong> Generate high-value recurring revenue, deepen customer relationships, solidify market position as premier regional provider, transition to "Run" phase. [1]</li>
-                <li><strong>Services Activated:</strong> [1]
-                    <ul>
-                        <li><strong>DRaaS (Hybrid & CSP-based):</strong> Advanced solutions leveraging UNN and white-labeled CSPs (Azure Site Recovery, Google Cloud Backup and DR, AWS Elastic Disaster Recovery) for complex DR scenarios. [1]</li>
-                        <li><strong>Managed Services:</strong> Comprehensive suite for customer workloads on UNN and white-labeled CSPs (OS management, DB admin, network/security services, APM, SecOps, FinOps). [1]</li>
-                    </ul>
-                </li>
-                <li><strong>Deployment Activities:</strong>
-                    <ul>
-                        <li><em>Advanced DRaaS Development:</em> Integrate CSP-native DR tools, design/productize hybrid/multi-cloud DRaaS offerings, automate failover/failback, establish DR testing services, update tiers/RPOs/RTOs/pricing. [1]</li>
-                        <li><em>Managed Services Platform & Portfolio Expansion:</em> Enhance operational tools for multi-cloud management, develop tiered managed services portfolio, build specialized technical teams, define SLAs/procedures. [1]</li>
-                    </ul>
-                </li>
-                <li><strong>Key Outputs:</strong> Comprehensive resilient DRaaS portfolio, defined managed services suite, DST as trusted regional hub, documented best practices. [1]</li>
-                <li><strong>Value Delivered:</strong> High-value recurring revenue (DRaaS significant contributor), deeper customer loyalty, premier regional cloud provider status. [1]</li>
-            </ul>
+                </div>
+            </div>
         </section>
 
-        <section id="multi_cloud_integration">
-            <h2>V. Multi-Cloud Integration and White-Labeled Service Delivery</h2>
-            <h3>A. CSP Selection Rationale per Use Case/Service [1]</h3>
-            <p>Selection of AWS, Azure, and Google Cloud for particular use cases will align CSP strengths with DST's requirements. Ollion's white-labeling provides a unified experience. Examples:</p>
-            <ul>
-                <li><strong>Google Cloud:</strong> Favored for Use Case 2 (Data Storage/Analytics) if DST has significant big data/advanced analytics needs (BigQuery, Vertex AI).</li>
-                <li><strong>Microsoft Azure:</strong> Preferred for modernizing/hosting .NET applications or Microsoft ecosystem workloads (Use Case 3) (Azure App Service, AKS, Azure SQL).</li>
-                <li><strong>Amazon Web Services (AWS):</strong> Primary for general-purpose IaaS, broad application hosting (Use Cases 1 & 3), or specific DRaaS due to mature services.</li>
-            </ul>
-            <p>Ollion will provide justification, considering existing investments, features, performance, cost, and data sovereignty.</p>
-
-            <h3>B. Ollion's White-Labeling Operating Model for DST [1]</h3>
-            <p>Ollion delivers a fully managed, white-labeled multi-cloud experience to simplify complexity, provide consistent governance, and optimize performance/cost.</p>
-            <ul>
-                <li><strong>Service Abstraction and Presentation:</strong> Unified Ollion interface (service portal, standardized service catalog abstracting CSP specifics), Ollion branding. [1]</li>
-                <li><strong>Billing Management and Cost Optimization:</strong> Consolidated Ollion invoice, cost allocation/showback, proactive cost optimization (monitoring, waste elimination, rightsizing, leveraging CSP pricing models). [1]</li>
-                <li><strong>Support and Escalation Procedures:</strong> Ollion as single point of contact (Level 1/2 support), defined SLAs, managed escalation to CSPs (Level 3), white-label support experience. [1]</li>
-                <li><strong>Service Management and Governance:</strong> ITIL-aligned processes, policy enforcement, change management, performance/compliance reporting. Ollion manages complexities of offshore CSPs (data sovereignty, support models, vendor management). [1]</li>
-            </ul>
-
-            <h3>C. Cross-Cloud Governance, Security, and Compliance Framework [1]</h3>
-            <p>Ollion will establish a unified framework for consistent governance, security, and compliance across UNN and multi-CSP environments.</p>
-            <ul>
-                <li><strong>Unified Governance Framework:</strong> Policies, standards, processes for resource organization, tagging, cost management, provisioning, access control.</li>
-                <li><strong>Centralized or Federated Identity Management:</strong> Consistent user access/control (federating DST's IdP or centralized solution for SSO).</li>
-                <li><strong>Consistent Security Posture Management:</strong> CSPM tools, security baselines enforced via native CSP tools (Security Hub, Azure Policy, Google Security Command Center) and third-party solutions, managed by Ollion.</li>
-                <li><strong>Compliance Mapping and Reporting:</strong> Map DST's regulatory requirements to UNN/CSP controls, implement configurations, provide reporting for audits.</li>
-                <li><strong>Automation:</strong> Leverage IaC for policy enforcement, automated security checks, and compliance reporting.</li>
-            </ul>
-
-            <h3>D. Network Integration and Interoperability [1]</h3>
-            <p>Ollion will design and manage a comprehensive network integration strategy.</p>
-            <ul>
-                <li><strong>Connectivity between UNN and CSP Landing Zones:</strong> Secure, reliable connectivity (Site-to-Site VPNs or Dedicated Interconnects like AWS Direct Connect, Azure ExpressRoute, Google Cloud Interconnect).</li>
-                <li><strong>Inter-CSP Connectivity:</strong> Solutions for direct, private communication between workloads on different CSPs if needed (CSP peering, third-party NaaS).</li>
-                <li><strong>DNS Strategy:</strong> Unified DNS for consistent name resolution (integrating UNN DNS with CSP DNS or centralized solution).</li>
-                <li><strong>IP Addressing and Routing Plans:</strong> Comprehensive IPAM to avoid conflicts and ensure efficient routing.</li>
-                <li><strong>Network Security:</strong> Consistent controls (firewalls, NSGs/Security Groups, WAFs) managed by Ollion.</li>
-                <li><strong>Considerations:</strong> Optimize for data transfer costs and latency.</li>
-            </ul>
-
-            <h3>E. Other Cross-Cutting Considerations [1]</h3>
-            <ul>
-                <li><strong>Skills Development and Organizational Readiness (DST Internal):</strong> Continuous skills development for technical, sales, and support teams. Potential organizational restructuring for cloud brokerage operations.</li>
-                <li><strong>Partner Ecosystem Management:</strong> Dedicated DST resources for managing relationships with AWS, Google Cloud, Azure; joint GTM strategies.</li>
-                <li><strong>Customer Onboarding and Support:</strong> Streamlined onboarding processes; tiered support model with DST owning the primary relationship.</li>
-                <li><strong>Branding and Customer Experience:</strong> Holistic approach to branding, marketing, and communication to establish DST as the primary provider. Consistent DST-branded experience across all touchpoints. [1]</li>
-            </ul>
-        </section>
-
-        <section id="migration_approach">
-            <h2>VI. Detailed Migration Approach (UNN to White-Labeled CSPs) [1]</h2>
-            <p>A structured methodology to minimize risk and downtime.</p>
-            <h3>A. Assessment and Discovery of UNN Workloads</h3>
-            <ul>
-                <li>Comprehensive inventory (applications, data, infrastructure), dependency mapping, performance baselining, security/compliance assessment. Tools: Azure Migrate, AWS Application Discovery Service.</li>
-                <li><em>Deliverable:</em> Cloud Readiness Assessment Report.</li>
-            </ul>
-            <h3>B. Migration Planning</h3>
-            <ul>
-                <li>Workload analysis and prioritization, migration strategy per workload (The "6 Rs": Rehost, Replatform, Refactor, Repurchase, Retain, Retire), wave planning, tool selection (native CSP tools like AWS MGN, Azure Migrate, Google Cloud Migrate; third-party tools).</li>
-                <li><em>Deliverable:</em> Detailed Migration Plan.</li>
-            </ul>
-            <h3>C. Execution Strategies</h3>
-            <ul>
-                <li>Target environment provisioning on CSPs (using IaC), application migration (per "R" strategy), data migration and synchronization (initial bulk transfer, ongoing sync, integrity validation).</li>
-                <li><em>Deliverable:</em> Migrated Workloads Operational on CSPs.</li>
-            </ul>
-            <h3>D. Testing and Validation</h3>
-            <ul>
-                <li>Functional testing, performance testing, security testing, User Acceptance Testing (UAT) by DST, DR testing.</li>
-                <li><em>Deliverables:</em> Test Plans, Test Reports, UAT Sign-off.</li>
-            </ul>
-            <h3>E. Cutover and Go-Live</h3>
-            <ul>
-                <li>Detailed cutover plan (pre-checks, activities, rollback, communication), final data sync, DNS changes, go/no-go checkpoints, post-go-live hypercare.</li>
-                <li><em>Deliverable:</em> Go-Live Confirmation, Post-Migration Support Plan.</li>
-            </ul>
-            <h3>F. Decommissioning of UNN Resources</h3>
-            <ul>
-                <li>Phased decommissioning of UNN servers/storage/network, data archival/cleanup, license management.</li>
-                <li><em>Deliverable:</em> UNN Decommissioning Report.</li>
-            </ul>
-        </section>
-
-        <section id="roadmap">
-            <h2>VII. Deployment Roadmap and Timeline</h2>
-            <img src="path_to_your_image.png" alt="DST Cloud Deployment Roadmap" class="responsive-img" />
-            <h3>A. Alignment with Proposal</h3>
-            <p>This roadmap elaborates on high-level schedules previously communicated (e.g., "2025 DST Proposal - Cloud Zone Strategy.pdf", slide 23), providing more granularity while maintaining strategic alignment. [1]</p>
-            <h3>B. Phased Rollout Plan (incorporating "Crawl, Walk, Run" [1])</h3>
-            <ul>
-                <li><strong>Phase 0: Project Initiation & UNN Landing Zone Deployment ("Crawl" - Start) (Approx. 0-3 Months from Project Start [1])</strong>
-                    <ul>
-                        <li><em>Key Activities:</em> Project kick-off, detailed UNN LZ discovery/design/build, initial operational procedures, detailed overall project/migration plan. [1]</li>
-                        <li><em>Key Deliverables:</em> Project Charter, UNN LZ Design Doc, Validated UNN LZ, Initial Cloud Readiness Assessment, Detailed Migration Plan for UC1 (UNN). [1]</li>
+        <section id="serviceDelivery" class="content-section space-y-6">
+            <div class="card p-6">
+                <h2 class="text-2xl font-semibold mb-4">Multi-Cloud Integration & White-Labeled Service Delivery</h2>
+                <p class="mb-4">Ollion's strategy involves strategic CSP selection (AWS, Azure, GCP) based on use case needs, all delivered through a unified, white-labeled service model. This simplifies complexity, ensures consistent governance, and optimizes performance and cost for DST.</p>
+                
+                <div class="mb-6 p-4 bg-accent-light rounded-lg">
+                    <h3 class="text-xl font-semibold mb-3 accent-color">Ollion's White-Labeling Operating Model</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>Service Abstraction & Presentation:</strong> Unified Ollion service portal, standardized service catalog, Ollion branding for cohesive experience.</li>
+                        <li><strong>Billing Management & Cost Optimization:</strong> Consolidated invoicing, cost allocation/showback, proactive cost optimization by Ollion.</li>
+                        <li><strong>Support & Escalation:</strong> Single point of contact (Ollion L1/L2 support), defined SLAs, managed escalation to CSPs (L3).</li>
+                        <li><strong>Service Management & Governance:</strong> ITIL-aligned processes, policy enforcement, change management, performance/compliance reporting.</li>
                     </ul>
-                </li>
-                <li><strong>Phase 1: Use Case 1 Deployment - Foundational UNN IaaS & Data Storage; Initial Workload Migration to UNN ("Crawl" - Cont.) (Approx. Months 1-4 post-LZ [1])</strong>
-                    <ul>
-                        <li><em>Key Activities:</em> Migration of pilot workloads to UNN LZ, stabilization. Design/build of initial Platform LZ (PLZ) on first CSP. Transition pilot workloads from UNN to first CSP PLZ. Setup initial Ollion white-label portal/billing for first CSP. [1]</li>
-                        <li><em>Key Deliverables:</em> Pilot Workloads on UNN, Operational UNN LZ, Initial PLZ on First CSP, Pilot Workloads on First CSP, Basic Ollion Portal. [1]</li>
-                    </ul>
-                </li>
-                <li><strong>Phase 2: Use Case 2 Deployment - Enabling Cloud Adoption (Migration Services) & Foundational DR (UNN-to-UNN); Initiate Data Storage/Analytics on CSP ("Walk" - Start) (Approx. Months 3-9 post-LZ [1])</strong>
-                    <ul>
-                        <li><em>Key Activities [1, 1]:</em> Establish Migration Services practice. Deploy UNN-to-UNN DRaaS. Detailed data landscape assessment. Design/implement scalable data storage on UNN (if needed) and CSPs (data lakes, databases). Migrate/ingest data to CSP storage. Setup foundational analytics on CSP. Finalize CSP partnerships. LZ enhancement for CSPs. [1]</li>
-                        <li><em>Key Deliverables:</em> Migration Services live, UNN DRaaS live, CSP partnerships, LZ ready for CSPs, Data Landscape Assessment, Data Storage Architecture (UNN/CSP), Implemented Data Storage on CSPs, Initial Data Ingestion to CSPs, Foundational Analytics on CSPs. [1]</li>
-                    </ul>
-                </li>
-                <li><strong>Phase 3: Use Case 3 Deployment - Multi-Cloud Brokerage (White-labeled IaaS) & Expanded Data Services (Hybrid Storage); Application Modernization ("Run" - Start) (Approx. Months 7-18+ post-LZ [1])</strong>
-                    <ul>
-                        <li><em>Key Activities:</em> Iterative CSP integration (IaaS, Storage). IaaS Brokerage Platform rollout. Integrated Billing go-live. Hybrid Data Storage deployment. Comprehensive application portfolio assessment (6 R's). Wave planning & execution of application migrations/modernization to CSPs (parallel streams). [1]</li>
-                        <li><em>Key Deliverables:</em> Full brokerage for IaaS & Data Storage (UNN, AWS, GC, Azure), App Portfolio Assessment & Modernization Roadmap, Majority of Apps Migrated/Modernized to CSPs. [1]</li>
-                    </ul>
-                </li>
-                <li><strong>Phase 4: Use Case 4 Deployment - Advanced DR (Hybrid/CSP) & Regional Managed Services Leadership ("Run" - Scale) (Approx. Months 9-18+ post-LZ, overlaps [1])</strong>
-                    <ul>
-                        <li><em>Key Activities:</em> BIA, RTO/RPO definition. Design/implement Advanced DRaaS (Hybrid & CSP-based using AWS DRS, ASR, GCP DR). Develop/test DR runbooks. Full DR drills. Managed Services portfolio development & launch. [1]</li>
-                        <li><em>Key Deliverables:</em> BIA Report, Comprehensive DR Plan, Implemented/Tested DRaaS, Operational DR Runbooks, Managed Services operational. [1]</li>
-                    </ul>
-                </li>
-                <li><strong>Phase 5: Optimization and Ongoing Management (Continuous [1])</strong>
-                    <ul>
-                        <li><em>Key Activities:</em> Continuous performance/cost/security optimization, governance refinement, potential full operational handover to DST with Ollion providing ongoing managed services. [1]</li>
-                        <li><em>Key Deliverables:</em> Optimization Reports, Updated Governance, Fully Operational White-Labeled Multi-Cloud Service. [1]</li>
-                    </ul>
-                </li>
-            </ul>
-            <h3>C. Key Milestones and Decision Gates [1]</h3>
-            <p>Examples: M1: UNN LZ & Pilot Workloads on UNN Operational. M2: First CSP PLZ & Pilot Workloads on CSP Operational. M3: Scalable Data Storage/Analytics on CSPs Operational. M4: Critical App Group 1 Migrated/Modernized. M5: Comprehensive DR Tested. M6: Project Completion.</p>
-            <h3>D. Dependencies between Phases and Workstreams [1]</h3>
-            <p>Critical path: LZ completion -> Core UNN Services (UC1) -> Migration Services (UC2) -> First White-Labeled CSP Integration (UC3) -> Subsequent CSP Integrations. Parallel workstreams feasible post-Core LZ.</p>
-            <h3>E. High-Level Resource Allocation Plan [1]</h3>
-            <ul>
-                <li><strong>Ollion Team:</strong> Project/Program Manager, Cloud Solutions Architects, Migration/Data/Security/DevOps Engineers, Service Management.</li>
-                <li><strong>DST Team:</strong> Project Sponsor, Business Stakeholders, Application Owners, SMEs, IT Operations.</li>
-                <li><strong>Third-Party/CSP Professional Services:</strong> Managed by Ollion if needed.</li>
-            </ul>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="p-4 border border-gray-300 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-2">Cross-Cloud Governance, Security & Compliance</h3>
+                        <p>A unified framework across UNN and CSPs covering resource organization, identity management (federated/centralized), consistent security posture (CSPM tools), and compliance mapping/reporting.</p>
+                    </div>
+                    <div class="p-4 border border-gray-300 rounded-lg">
+                        <h3 class="text-lg font-semibold mb-2">Network Integration & Interoperability</h3>
+                        <p>Secure connectivity between UNN and CSPs (VPNs, Direct Connect/ExpressRoute), inter-CSP connectivity if needed, unified DNS strategy, IPAM, and consistent network security controls, managed by Ollion.</p>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <section id="governance">
-            <h2>VIII. Governance and Project Management [1]</h2>
-            <h3>A. Project Governance Structure</h3>
-            <ul>
-                <li><strong>Steering Committee (Ollion & DST Execs):</strong> Strategic oversight, key decisions, issue resolution.</li>
-                <li><strong>Project Management Team (Ollion PM, DST PM):</strong> Day-to-day execution, progress tracking, risk/issue management.</li>
-                <li><strong>Technical Workstream Leads (Ollion):</strong> Technical delivery, coordination with DST SMEs.</li>
-                <li><strong>Communication Plan:</strong> Formal plan for status reports, risk updates, milestone reviews.</li>
-                <li><strong>RACI Matrix:</strong> To clarify roles for key phases/deliverables (Responsible, Accountable, Consulted, Informed).</li>
-            </ul>
-            <h3>B. Risk Management Framework</h3>
-            <ul>
-                <li>Continuous process: Risk identification, assessment (likelihood/impact), mitigation strategies, contingency plans, Risk Register maintained and reviewed.</li>
-                <li><em>Deliverable:</em> Risk Register and Mitigation Plan.</li>
-            </ul>
-            <h3>C. Change Management Process</h3>
-            <ul>
-                <li>Formal process: Change request submission, impact assessment (scope, schedule, cost, resources, risk), approval by appropriate authority, implementation and communication.</li>
-            </ul>
-            <h3>D. Quality Assurance Plan</h3>
-            <ul>
-                <li>Define quality standards/acceptance criteria, formal review/approval cycles for deliverables, comprehensive testing strategy, lessons-learned sessions.</li>
-            </ul>
-            <h3>E. Operational Readiness Review (ORR) Plan</h3>
-            <ul>
-                <li>Conducted before major service/use case go-live. ORR checklists (infrastructure, monitoring, backup/DR, security, procedures, training, support handover). Key input to go/no-go decision. AWS ORR custom lens adaptable.</li>
-            </ul>
+        <section id="governance" class="content-section space-y-6">
+            <div class="card p-6">
+                <h2 class="text-2xl font-semibold mb-4">Governance and Project Management</h2>
+                <p class="mb-4">A robust governance and project management framework will ensure clear communication, effective decision-making, and proactive risk management throughout the project.</p>
+
+                <div class="mb-6">
+                    <h3 class="text-xl font-semibold mb-3">Project Governance Structure</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Steering Committee:</strong> Ollion & DST executives for strategic oversight.</li>
+                        <li><strong>Project Management Team:</strong> Ollion Program Manager & DST PM for day-to-day execution.</li>
+                        <li><strong>Technical Workstream Leads:</strong> For specialized areas.</li>
+                        <li><strong>Communication Plan:</strong> Formal plan for regular updates and reporting.</li>
+                    </ul>
+                </div>
+                
+                <h3 class="text-xl font-semibold mb-3">High-Level Responsibility Matrix (RACI) - Key Phases</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project Phase / Major Deliverable</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ollion</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DST</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Third-Party (if any)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr><td colspan="4" class="px-4 py-2 font-semibold bg-gray-100">Phase 0: Project Initiation & UNN LZ</td></tr>
+                            <tr><td class="px-4 py-2">Detailed Project Plan</td><td class="px-4 py-2">R, A</td><td class="px-4 py-2">C, I</td><td class="px-4 py-2">I</td></tr>
+                            <tr><td class="px-4 py-2">UNN LZ Design Document</td><td class="px-4 py-2">R, A</td><td class="px-4 py-2">C, I</td><td class="px-4 py-2">I</td></tr>
+                            <tr><td class="px-4 py-2">Built UNN LZ</td><td class="px-4 py-2">R, A</td><td class="px-4 py-2">C, I (access, approvals)</td><td class="px-4 py-2">I</td></tr>
+                            <tr><td colspan="4" class="px-4 py-2 font-semibold bg-gray-100">Phase 1: UC1 - IaaS & Pilot Migration</td></tr>
+                            <tr><td class="px-4 py-2">Pilot Workload Migration (UNN & First CSP)</td><td class="px-4 py-2">R, A</td><td class="px-4 py-2">R (app expertise, UAT), C, I</td><td class="px-4 py-2">I</td></tr>
+                            <tr><td class="px-4 py-2">First CSP Platform LZ Build</td><td class="px-4 py-2">R, A</td><td class="px-4 py-2">C, I (policy inputs)</td><td class="px-4 py-2">I</td></tr>
+                            <tr><td colspan="4" class="px-4 py-2 font-semibold bg-gray-100">Phase 2: UC2 - Data Storage</td></tr>
+                             <tr><td class="px-4 py-2">Data Storage Solution (UNN & CSP)</td><td class="px-4 py-2">R, A</td><td class="px-4 py-2">R (data expertise, validation), C, I</td><td class="px-4 py-2">I</td></tr>
+                             <tr><td colspan="4" class="px-4 py-2 font-semibold bg-gray-100">Phase 3: UC3 - Application Modernization</td></tr>
+                            <tr><td class="px-4 py-2">Application Migration/Modernization to CSPs</td><td class="px-4 py-2">R, A</td><td class="px-4 py-2">R (app expertise, UAT), C, I</td><td class="px-4 py-2">I</td></tr>
+                             <tr><td colspan="4" class="px-4 py-2 font-semibold bg-gray-100">Phase 4: UC4 - Comprehensive DR</td></tr>
+                            <tr><td class="px-4 py-2">DRaaS Solution Implemented & Tested</td><td class="px-4 py-2">R, A</td><td class="px-4 py-2">R (BIA, RTO/RPO, test participation), C, I</td><td class="px-4 py-2">I</td></tr>
+                        </tbody>
+                         <tfoot class="bg-gray-50"><tr><td colspan="4" class="px-4 py-1 text-xs">R=Responsible, A=Accountable, C=Consulted, I=Informed</td></tr></tfoot>
+                    </table>
+                </div>
+                 <div class="mt-6 space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-lg">Risk Management:</h4>
+                        <p>Continuous risk identification, assessment, mitigation strategies, contingency plans, and a formal Risk Register.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg">Change Management:</h4>
+                        <p>Formal process for change request submission, impact assessment, approval, implementation, and communication.</p>
+                    </div>
+                     <div>
+                        <h4 class="font-semibold text-lg">Quality Assurance & Operational Readiness Reviews (ORR):</h4>
+                        <p>QA plan with quality standards, review cycles, and comprehensive testing. ORRs before major service go-lives ensure all technical, operational, and support aspects are ready.</p>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <section id="key_considerations">
-            <h2>IX. Key Considerations and Recommendations [1]</h2>
-            <h3>A. Technical Debt Management</h3>
-            <ul>
-                <li>Identification/assessment during migration. Strategic remediation (during refactoring, prioritized, or accepted short-term with plan). Prevent new debt via cloud-native principles, IaC, code reviews.</li>
-                <li><em>Recommendation:</em> DST allocate resources for ongoing technical debt management.</li>
-            </ul>
-            <h3>B. Skills and Training</h3>
-            <ul>
-                <li>Skills assessment of DST teams. Tailored training plan (Ollion portal, cloud best practices, specific tech, financial management). Encourage continuous learning.</li>
-                <li><em>Recommendation:</em> DST invest in upskilling for maximum benefit and collaboration. [1]</li>
-            </ul>
-            <h3>C. Vendor Management (Ollion's Role)</h3>
-            <ul>
-                <li>Ollion as single point of contact for DST. Ollion manages CSP relationships (technical/commercial, support, updates). Ollion monitors CSP performance/SLAs.</li>
-                <li><em>Recommendation:</em> DST establish clear communication/review processes with Ollion.</li>
-            </ul>
-            <h3>D. Security and Compliance Posture (Ongoing)</h3>
-            <ul>
-                <li>Continuous security monitoring by Ollion. Joint incident response plan. Ongoing compliance management support from Ollion (audits, evidence). Ollion manages security updates/patching for IaaS/platform.</li>
-                <li><em>Recommendation:</em> DST actively participate in security/compliance reviews with Ollion.</li>
-            </ul>
-            <h3>E. Future Scalability and Evolution</h3>
-            <ul>
-                <li>Scalable architecture design. Ollion to evolve service catalog with DST. Ollion to advise on new tech adoption (AI/ML, serverless, edge).</li>
-                <li><em>Recommendation:</em> DST establish regular strategic review cycle with Ollion.</li>
-            </ul>
+        <section id="keyConsiderations" class="content-section space-y-6">
+            <div class="card p-6">
+                 <h2 class="text-2xl font-semibold mb-4">Key Considerations and Recommendations</h2>
+                 <p class="mb-6">Proactive strategic considerations to ensure DST's long-term success and value realization from this multi-cloud transformation.</p>
+                 <div class="space-y-4">
+                    <div class="border border-gray-300 rounded-lg">
+                        <button class="accordion-toggle w-full text-left p-4 bg-gray-100 hover:bg-gray-200 focus:outline-none flex justify-between items-center rounded-t-lg">
+                            <span class="font-semibold text-lg">Technical Debt Management</span>
+                            <span class="text-xl transition-transform transform rotate-0 ui-open:rotate-180">&#9660;</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white rounded-b-lg">
+                            <p>Identification, assessment, and strategic remediation of existing technical debt during migration and modernization. Preventing new debt through cloud-native design principles and IaC. DST should allocate resources for ongoing management.</p>
+                        </div>
+                    </div>
+                    <div class="border border-gray-300 rounded-lg">
+                        <button class="accordion-toggle w-full text-left p-4 bg-gray-100 hover:bg-gray-200 focus:outline-none flex justify-between items-center rounded-t-lg">
+                            <span class="font-semibold text-lg">Skills and Training</span>
+                           <span class="text-xl transition-transform transform rotate-0 ui-open:rotate-180">&#9660;</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white rounded-b-lg">
+                            <p>Skills assessment for DST teams. Ollion to provide/facilitate tailored training on the white-labeled service, cloud consumption, specific technologies, and cloud financial management. Encourage continuous learning.</p>
+                        </div>
+                    </div>
+                    <div class="border border-gray-300 rounded-lg">
+                        <button class="accordion-toggle w-full text-left p-4 bg-gray-100 hover:bg-gray-200 focus:outline-none flex justify-between items-center rounded-t-lg">
+                            <span class="font-semibold text-lg">Vendor Management (Ollion's Role)</span>
+                           <span class="text-xl transition-transform transform rotate-0 ui-open:rotate-180">&#9660;</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white rounded-b-lg">
+                            <p>Ollion as the single point of contact, managing underlying CSP relationships, performance, and SLAs on behalf of DST. DST should establish clear review processes with Ollion.</p>
+                        </div>
+                    </div>
+                    <div class="border border-gray-300 rounded-lg">
+                        <button class="accordion-toggle w-full text-left p-4 bg-gray-100 hover:bg-gray-200 focus:outline-none flex justify-between items-center rounded-t-lg">
+                            <span class="font-semibold text-lg">Security and Compliance Posture (Ongoing)</span>
+                            <span class="text-xl transition-transform transform rotate-0 ui-open:rotate-180">&#9660;</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white rounded-b-lg">
+                            <p>Continuous security monitoring, joint incident response plan, ongoing compliance management (audits, reporting), security updates and patching managed by Ollion. DST active participation in reviews is key.</p>
+                        </div>
+                    </div>
+                    <div class="border border-gray-300 rounded-lg">
+                        <button class="accordion-toggle w-full text-left p-4 bg-gray-100 hover:bg-gray-200 focus:outline-none flex justify-between items-center rounded-t-lg">
+                             <span class="font-semibold text-lg">Future Scalability and Evolution</span>
+                           <span class="text-xl transition-transform transform rotate-0 ui-open:rotate-180">&#9660;</span>
+                        </button>
+                        <div class="accordion-content p-4 bg-white rounded-b-lg">
+                            <p>Architecture designed for scalability. Ollion to work with DST on evolving the service catalog, incorporating new CSP services, and advising on new technologies (AI/ML, serverless) through regular strategic reviews.</p>
+                        </div>
+                    </div>
+                 </div>
+            </div>
         </section>
 
-        <section id="conclusion">
-            <h2>X. Conclusion: Accelerating DST's Transformation</h2>
-            <p>This comprehensive deployment approach provides a structured and actionable pathway for DST to systematically build its Cloud Zone and realize its ambitious strategic objectives: to become Brunei's leading cloud-agnostic broker, a significant regional cloud services player, and to achieve its targeted financial growth of $1 billion in annual revenue with a 68% IRR. [1]</p>
-            <p>The phased rollout, centered around four key use cases—IaaS, Migration Services, Data Storage, and DRaaS—is designed to deliver incrementally increasing value, manage risk, and build capabilities progressively, following the "Crawl, Walk, Run" methodology. [1] The journey begins with the critical establishment of a robust Cloud Landing Zone, followed by the monetization of existing UNN assets through sovereign cloud offerings. It then expands strategically to incorporate white-labeled services from global hyperscalers—AWS, Google Cloud, and Azure—positioning DST as a comprehensive intermediary capable of offering choice, flexibility, and integrated management. [1] The culmination of this deployment will see DST offering advanced, high-value services such as sophisticated hybrid DRaaS and comprehensive multi-cloud Managed Services, solidifying its leadership in the region. [1]</p>
-            <p>The successful execution of this plan, supported by robust governance, detailed migration strategies, and a proactive approach to key considerations like skills development and security, will not only unlock significant revenue potential but will also fundamentally transform DST's role in the digital ecosystem. [1] It requires a concerted effort across technology deployment, operational model evolution, skills development, and strategic partner management.</p>
-            <p>Ollion remains committed to partnering with DST throughout this transformative journey, providing the necessary expertise in cloud strategy, design, implementation, and operationalization to ensure the Cloud Zone becomes a resounding success. [1] The immediate call to action is to proceed with the detailed project planning, resource allocation, and initiation of Phase 0: the design and build of the foundational Cloud Landing Zone, which will serve as the bedrock for all future Cloud Zone services and DST's accelerated transformation. [1]</p>
+        <section id="glossary" class="content-section">
+            <div class="card p-6">
+                <h2 class="text-2xl font-semibold mb-4">Glossary of Terms</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                    <div><strong class="accent-color">ALZ:</strong> Application Landing Zone</div>
+                    <div><strong class="accent-color">ASR:</strong> Azure Site Recovery</div>
+                    <div><strong class="accent-color">AWS:</strong> Amazon Web Services</div>
+                    <div><strong class="accent-color">Azure:</strong> Microsoft Azure</div>
+                    <div><strong class="accent-color">BIA:</strong> Business Impact Analysis</div>
+                    <div><strong class="accent-color">CSP:</strong> Cloud Service Provider</div>
+                    <div><strong class="accent-color">DRaaS:</strong> Disaster Recovery as a Service</div>
+                    <div><strong class="accent-color">DRS:</strong> AWS Elastic Disaster Recovery</div>
+                    <div><strong class="accent-color">GCP:</strong> Google Cloud Platform</div>
+                    <div><strong class="accent-color">IaaS:</strong> Infrastructure as a Service</div>
+                    <div><strong class="accent-color">IAM:</strong> Identity and Access Management</div>
+                    <div><strong class="accent-color">IaC:</strong> Infrastructure as Code</div>
+                    <div><strong class="accent-color">LZ:</strong> Landing Zone</div>
+                    <div><strong class="accent-color">MSP:</strong> Managed Service Provider</div>
+                    <div><strong class="accent-color">PLZ:</strong> Platform Landing Zone</div>
+                    <div><strong class="accent-color">RACI:</strong> Responsible, Accountable, Consulted, Informed</div>
+                    <div><strong class="accent-color">RBAC:</strong> Role-Based Access Control</div>
+                    <div><strong class="accent-color">RPO:</strong> Recovery Point Objective</div>
+                    <div><strong class="accent-color">RTO:</strong> Recovery Time Objective</div>
+                    <div><strong class="accent-color">SLA:</strong> Service Level Agreement</div>
+                    <div><strong class="accent-color">SoW:</strong> Statement of Work</div>
+                    <div><strong class="accent-color">UAT:</strong> User Acceptance Testing</div>
+                    <div><strong class="accent-color">UNN:</strong> (Assumed) DST's existing on-premise/private cloud infrastructure.</div>
+                    <div><strong class="accent-color">VPC/VNet:</strong> Virtual Private Cloud / Virtual Network</div>
+                </div>
+            </div>
         </section>
+    </main>
 
-        <section id="appendix">
-            <h2>XI. Appendix</h2>
-            <h3>A. Detailed Technical Specifications [1]</h3>
-            <p>Detailed technical specifications for network configurations, server instance types, storage tiering, specific security tool configurations, and other granular technical details will be documented in separate, dedicated design and configuration documents for each phase and use case.</p>
-            <h3>B. Glossary of Terms [1]</h3>
-            <p>A comprehensive glossary will be provided in detailed documentation. Key terms include: ALZ (Application Landing Zone), ASR (Azure Site Recovery), AWS (Amazon Web Services), Azure (Microsoft Azure), BIA (Business Impact Analysis), CSP (Cloud Service Provider), DRaaS (Disaster Recovery as a Service), DRS (AWS Elastic Disaster Recovery), GCP (Google Cloud Platform), IaaS (Infrastructure as a Service), IAM (Identity and Access Management), IaC (Infrastructure as Code), LZ (Landing Zone), MSP (Managed Service Provider), PLZ (Platform Landing Zone), RACI (Responsible, Accountable, Consulted, Informed), RBAC (Role-Based Access Control), RPO (Recovery Point Objective), RTO (Recovery Time Objective), SLA (Service Level Agreement), SoW (Statement of Work), UAT (User Acceptance Testing), UNN (Unified National Network), VPC/VNet (Virtual Private Cloud/Virtual Network). [1]</p>
-            <h3>C. Sample Statement of Work (SoW) Structure for Ongoing Managed Services [1]</h3>
-            <p>(Structure including Introduction, Scope of Services, SLAs, Deliverables, Roles/Responsibilities, Term, Pricing, Assumptions, Change Management, Governance, Acceptance Criteria.)</p>
-            <h3>D. Detailed Tooling List [1]</h3>
-            <p>(Categories including Discovery & Assessment, Migration, IaC, Monitoring & Logging, Security & Compliance, Cost Management, Service Management & Orchestration tools. Specifics in phase-relevant documents.)</p>
-            <h3>E. Works Cited</h3>
-            <ol>
-                <li>2025 DST Proposal - Cloud Zone Strategy.pdf [1]</li>
-                <li>Additional detailed web references are embedded within the text originating from the "Comprehensive Deployment Approach for DST's Multi-Cloud Transformation" document [1] using their original numbering from that source.</li>
-            </ol>
-        </section>
-    </div>
-
-    <footer class="footer">
-        <p>© 2025 DST Cloud Transformation Initiative. All Rights Reserved.</p>
+    <footer class="text-center p-4 text-sm text-gray-500 border-t mt-8">
+        &copy; Ollion & DST Collaboration. Interactive Deployment Plan.
     </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.content-section');
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mainNav = document.getElementById('mainNav');
+
+            mobileMenuButton.addEventListener('click', () => {
+                mainNav.classList.toggle('hidden');
+                mainNav.classList.toggle('flex');
+            });
+
+            function updateActiveSection() {
+                let currentSectionId = 'overview'; // Default section
+                const hash = window.location.hash;
+
+                if (hash) {
+                    const targetSection = document.querySelector(hash);
+                    if (targetSection && Array.from(sections).includes(targetSection)) {
+                        currentSectionId = hash.substring(1);
+                    }
+                }
+                
+                sections.forEach(section => {
+                    if (section.id === currentSectionId) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === '#' + currentSectionId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    // e.preventDefault(); // Keep default behavior to update hash
+                    const targetId = this.getAttribute('href').substring(1);
+                    
+                    sections.forEach(section => {
+                        section.classList.remove('active');
+                        if (section.id === targetId) {
+                            section.classList.add('active');
+                        }
+                    });
+
+                    navLinks.forEach(navLink => navLink.classList.remove('active'));
+                    this.classList.add('active');
+
+                    if (mainNav.classList.contains('flex') && !mainNav.classList.contains('md:flex')) {
+                         mainNav.classList.add('hidden');
+                         mainNav.classList.remove('flex');
+                    }
+                });
+            });
+            
+            window.addEventListener('hashchange', updateActiveSection);
+            updateActiveSection(); // Initial call to set active section based on URL hash or default
+
+            // Accordion functionality
+            const accordionToggles = document.querySelectorAll('.accordion-toggle');
+            accordionToggles.forEach(toggle => {
+                toggle.addEventListener('click', function () {
+                    const content = this.nextElementSibling;
+                    const icon = this.querySelector('.text-xl');
+                    
+                    // Close other open accordions within the same parent group
+                    const parentGroup = this.closest('.space-y-4'); // Assuming accordions are grouped this way
+                    if (parentGroup) {
+                        parentGroup.querySelectorAll('.accordion-content').forEach(item => {
+                            if (item !== content && item.style.maxHeight) {
+                                item.style.maxHeight = null;
+                                item.previousElementSibling.querySelector('.text-xl').classList.remove('rotate-180');
+                                 item.previousElementSibling.classList.remove('ui-open');
+                            }
+                        });
+                    }
+
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.classList.remove('rotate-180');
+                        this.classList.remove('ui-open');
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.classList.add('rotate-180');
+                        this.classList.add('ui-open');
+                    }
+                });
+            });
+
+            // Roadmap Chart
+            const roadmapData = {
+                labels: [
+                    'Phase 0: Initiation & UNN LZ', 
+                    'Phase 1: UC1 - IaaS & Pilot Migration', 
+                    'Phase 2: UC2 - Scalable Data Storage', 
+                    'Phase 3: UC3 - App Modernization', 
+                    'Phase 4: UC4 - Comprehensive DR',
+                    'Phase 5: Optimization (Ongoing)'
+                ],
+                datasets: [{
+                    label: 'Estimated Duration (Illustrative Months)',
+                    data: [
+                        { x: [0, 2], y: 'Phase 0: Initiation & UNN LZ', activities: 'Project kick-off, UNN LZ Design & Build, Initial Assessments' },
+                        { x: [2, 5], y: 'Phase 1: UC1 - IaaS & Pilot Migration', activities: 'Pilot migration to UNN, First CSP PLZ Build, Pilot to CSP' },
+                        { x: [5, 9], y: 'Phase 2: UC2 - Scalable Data Storage', activities: 'Data landscape assessment, CSP Data Storage Implementation' },
+                        { x: [9, 15], y: 'Phase 3: UC3 - App Modernization', activities: 'App portfolio assessment, Wave migrations, Modernization efforts' },
+                        { x: [15, 18], y: 'Phase 4: UC4 - Comprehensive DR', activities: 'BIA, RTO/RPO, DRaaS implementation & testing' },
+                        { x: [18, 24], y: 'Phase 5: Optimization (Ongoing)', activities: 'Continuous monitoring, cost/security/performance optimization' } // Showing first 6 months of ongoing
+                    ],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(201, 203, 207, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(201, 203, 207, 1)'
+                    ],
+                    borderWidth: 1,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.8
+                }]
+            };
+
+            const roadmapConfig = {
+                type: 'bar',
+                data: roadmapData,
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Timeline (Illustrative Months)'
+                            },
+                            min: 0,
+                            max: 24 // Adjusted to fit the illustrative timeline
+                        },
+                        y: {
+                            stacked: true,
+                             ticks: {
+                                autoSkip: false,
+                                callback: function(value, index, values) {
+                                    const label = this.getLabelForValue(value);
+                                    if (label.length > 30) { // Wrap label if too long
+                                        return label.match(/.{1,30}/g); // Split into lines of 30 chars
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // Using bar colors for phase identification
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const datasetLabel = context.dataset.label || '';
+                                    const phase = context.raw.y;
+                                    const duration = context.raw.x[1] - context.raw.x[0];
+                                    const activities = context.raw.activities;
+                                    return `${phase}: ${duration} months. Key Activities: ${activities}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            
+            const roadmapChartCtx = document.getElementById('roadmapChart');
+            if (roadmapChartCtx) {
+                 new Chart(roadmapChartCtx, roadmapConfig);
+            } else {
+                console.error("Roadmap chart canvas element not found");
+            }
+        });
+    </script>
 </body>
 </html>
-
-
